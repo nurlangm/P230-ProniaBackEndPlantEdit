@@ -104,7 +104,9 @@ namespace P230_Pronia.Areas.ProniaAdmin.Controllers
                 Name = newPlant.Name,
                 Desc = newPlant.Desc,
                 Price = newPlant.Price,
-                SKU = newPlant.SKU,                
+                SKU = newPlant.SKU,
+                DiscountPrice=newPlant.DiscountPrice,
+                //Quantity=newPlant.Quantity,////////////////
                 PlantDeliveryInformationId = newPlant.PlantDeliveryInformationId,
 
 
@@ -305,8 +307,51 @@ namespace P230_Pronia.Areas.ProniaAdmin.Controllers
 
 
 
+
+
+
+
+
+
+
+
+            int sum = edited.Quantity;
+      
+
+            if (edited.ColorIds is null)
+            {
+                edited.ColorIds = model.ColorIds;
+            }
+
+            else
+            {
+                foreach (var item in plant.PlantSizeColors)
+                {
+                    _context.Remove(item);
+                }
+                foreach (var item in edited.ColorIds)
+                {
+                    foreach (var size in edited.SizeIds)
+                    {
+                    PlantSizeColor color = new()
+                    {
+                        PlantId = edited.Id,
+                        ColorId = item,
+                        SizeId=size,
+                        Quantity=sum
+                    };
+                    _context.PlantSizeColors.Add(color);
+
+                    }
+                }
+            }
+           
+
+
+
             plant.Name = edited.Name;
             plant.Price = edited.Price;
+            plant.DiscountPrice= edited.DiscountPrice;
             plant.Desc = edited.Desc;
             plant.SKU = edited.SKU;
             _context.SaveChanges();
@@ -316,6 +361,12 @@ namespace P230_Pronia.Areas.ProniaAdmin.Controllers
 
         private PlantVM? EditedPlant(int id)
         {
+            List<PlantSizeColor> plantSizeColors = _context.PlantSizeColors.Where(x=>x.PlantId== id).ToList();
+            int sum = 0;
+            foreach (var item in plantSizeColors)
+            {
+                sum+=item.Quantity;
+            }
             PlantVM? model = _context.Plants.Include(p => p.PlantCategories)
                                             .Include(p => p.PlantTags)
                                             .Include(p => p.PlantImages)
@@ -328,7 +379,8 @@ namespace P230_Pronia.Areas.ProniaAdmin.Controllers
                                                     SKU = p.SKU,
                                                     Desc = p.Desc,
                                                     Price = p.Price,
-                                                    DiscountPrice = p.Price,        
+                                                    DiscountPrice = p.DiscountPrice,
+                                                    Quantity = sum,
                                                     PlantDeliveryInformationId = p.PlantDeliveryInformationId,
                                                     ColorIds=p.PlantSizeColors.Select(c => c.ColorId).ToList(),//
                                                     SizeIds = p.PlantSizeColors.Select(c => c.SizeId).ToList(),//

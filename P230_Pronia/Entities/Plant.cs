@@ -12,7 +12,8 @@ namespace P230_Pronia.Entities
         public string SKU { get; set; }
         public string Desc { get; set; }
 
-
+        //[NotMapped]
+        //public int Quantity { get; set; }///
         public int PlantDeliveryInformationId { get; set; }
         public PlantDeliveryInformation PlantDeliveryInformation { get; set; }
         public List<PlantImage> PlantImages { get; set; }
